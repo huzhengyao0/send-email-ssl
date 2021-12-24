@@ -1,4 +1,4 @@
-package mail
+package ssl
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ sender
 receivers  eg aaa@example.aa,bb@example.bb
 subject
 content
-attachments
+attachments absolute path
 */
 func (mailUtils EMailUtils) SendMail(sender, receivers, subject, content string, attachments []string) error {
 	email := NewEmail()
@@ -35,13 +35,15 @@ func (mailUtils EMailUtils) SendMail(sender, receivers, subject, content string,
 	email.To = strings.Split(receivers, ",")
 	email.Subject = subject
 	email.HTML = []byte(content)
-	attas := make([]*Attachment, len(attachments))
-	for _, attachment := range attachments {
-		atta, err := email.AttachFile(attachment)
-		if err != nil {
-			return err
+	if attachments != nil && len(attachments) > 0{
+		attas := make([]*Attachment, len(attachments))
+		for _, attachment := range attachments {
+			atta, err := email.AttachFile(attachment)
+			if err != nil {
+				return err
+			}
+			attas = append(attas, atta)
 		}
-		attas = append(attas, atta)
 	}
 	return email.Send(mailUtils.ServerAddr, smtp.PlainAuth("", mailUtils.Username, mailUtils.Password, mailUtils.Host))
 }
